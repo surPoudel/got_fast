@@ -77,10 +77,18 @@ The same two files are copied to `--outdir`.
 
 ## Notes
 
-### `dupcut`
+### Requirements
+- Python: 3.9+ (3.10/3.11 recommended)
+- Perl: 5.28+ (used by IronThrone-GoT_only_preprocess)
+- R: not required for the fast pipeline (only needed if you still run the original R combiner)
+* LSF: optional (only if using the provided *.lsf.tpl templates on an LSF cluster)
 
-- `dupcut` in the *combiner/collapser* filters UMIs with `(WT+MUT) >= dupcut`.
-- Some legacy wrappers submit the per-chunk Perl step with `-d 1` to **retain all UMIs**, and then apply the final `dupcut` later during combining.
+## Python packages (fast pipeline)
+* These are required for 04_combine_chunks.py and got_post_process.py:
+- polars (fast table reads/joins/aggregation)
+- numpy
+- rapidfuzz (Levenshtein distance / cdist in UMI collapsing)
+
 
 ### Performance
 
