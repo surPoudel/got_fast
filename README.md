@@ -100,5 +100,6 @@ The combine step (`04_combine_chunks.py`) is designed to scale to thousands of c
 
 The upstream GoT pipeline is available at:
 - https://github.com/dan-landau/IronThrone-GoT
+- https://pmc.ncbi.nlm.nih.gov/articles/PMC6782071/ (original paper)
 
 This repository provides cluster wrappers and a fast Python combiner.
