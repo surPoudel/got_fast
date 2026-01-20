@@ -42,17 +42,17 @@ Example (matches the command you provided):
 
 ```bash
 bash run_got_pipeline.sh \
-  --fastqR1 /research/sharedresources/immunoinformatics/common/jqu/project/Senthil-long_read_seq-RPS19/data/testdata_1M/3364681_JCC365_RPS19_Ery_GoTseq_S29_L006_R1_001-1M_random.fastq.gz \
-  --fastqR2 /research/sharedresources/immunoinformatics/common/jqu/project/Senthil-long_read_seq-RPS19/data/testdata_1M/3364681_JCC365_RPS19_Ery_GoTseq_S29_L006_R2_001-1M_random.fastq.gz \
-  --config /research_jude/rgs01_jude/shres/IMINFO/common/Suresh/GoT_pipeline_fast/JCC365_RPS19-250825-1.config \
-  --whitelist /research_jude/rgs01_jude/shres/IMINFO/common/Suresh/GoT_pipeline_fast/3M-5pgex-jan-2023.txt \
+  --fastqR1 /path/to/Sample_R1_001.fastq.gz \
+  --fastqR2 /path/to/Sample_R2_001.fastq.gz \
+  --config /path/to/file.config \
+  --whitelist /path/to/whitelist.txt \
   --sample testQR \
-  --outdir /research/sharedresources/immunoinformatics/common/Suresh/GoT_pipeline_fast/new_analysis_fixed \
+  --outdir /path/to/analysis \
   --queue standard \
   --dupcut 2 \
   --threads 8 \
   --max_chunks 0 \
-  --perl /research/sharedresources/immunoinformatics/common/Suresh/GoT_pipeline_fast/IronThrone-GoT_only_preprocess \
+  --perl /path/to/IronThrone-GoT_only_preprocess \
   --python-bin python \
   --python-post "$(dirname "$0")/got_post_process.py" \
   --lev-dist 0.2 \
