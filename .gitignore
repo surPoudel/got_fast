@@ -1,0 +1,13 @@
+# pipeline outputs
+Output/
+preprocessing_fastqs/
+shuffled_split/
+*.out
+*.err
+*.lsf
+*.log
+
+# python
+__pycache__/
+*.pyc
+

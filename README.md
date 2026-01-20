@@ -1,0 +1,96 @@
+# Fast GoT Pipeline (LSF + Python/Polars combiner)
+
+This repository is a **drop-in, HPC-friendly wrapper** around the original IronThrone-GoT processing workflow, with a **fast Python/Polars-based chunk combiner + UMI collapsing** step.
+
+It is designed for workflows where:
+- You have many split FASTQ chunks (hundreds to thousands)
+- You want to run the **IronThrone-GoT preprocessing (Perl)** per chunk on an LSF cluster
+- You want to **merge and UMI-collapse** all chunk outputs quickly using **Polars**
+
+> Note on thresholds: the GoT manuscript describes optimizing mutation calling with a minimum duplicate read threshold of 2 and a maximum mismatch ratio of 0.2 (species-mixing study). See the manuscript for details.
+
+---
+
+## Repository contents
+
+- `run_got_pipeline.sh` – main entry point (CLI)
+- `00_config.sh` – defaults and environment settings
+- `01_shuffle_and_split.sh` – joins R1/R2, shuffles, and splits into chunk FASTQs
+- `02_submit_chunks.sh` – submits per-chunk LSF jobs
+- `03_wait_for_chunks.sh` – waits for chunk completion markers
+- `04_combine_chunks.py` – fast Polars combiner + R-like UMI collapsing
+- `got_post_process.py` – optional post-processing stub (hook point)
+- `IronThrone_chunk.lsf.tpl` – LSF template for per-chunk jobs
+- `IronThrone_batch.lsf.tpl` – LSF template for the combine job (optional)
+- `IronThrone-GoT_only_preprocess` – the Perl pipeline used for per-chunk preprocessing (passed via `--perl`)
+
+---
+
+## Quick start
+
+### 1) Create a conda env (recommended)
+
+```bash
+conda create -n got_fast python=3.11 -y
+conda activate got_fast
+pip install polars rapidfuzz python-Levenshtein numpy
+```
+
+### 2) Run
+
+Example (matches the command you provided):
+
+```bash
+bash run_got_pipeline.sh \
+  --fastqR1 /research/sharedresources/immunoinformatics/common/jqu/project/Senthil-long_read_seq-RPS19/data/testdata_1M/3364681_JCC365_RPS19_Ery_GoTseq_S29_L006_R1_001-1M_random.fastq.gz \
+  --fastqR2 /research/sharedresources/immunoinformatics/common/jqu/project/Senthil-long_read_seq-RPS19/data/testdata_1M/3364681_JCC365_RPS19_Ery_GoTseq_S29_L006_R2_001-1M_random.fastq.gz \
+  --config /research_jude/rgs01_jude/shres/IMINFO/common/Suresh/GoT_pipeline_fast/JCC365_RPS19-250825-1.config \
+  --whitelist /research_jude/rgs01_jude/shres/IMINFO/common/Suresh/GoT_pipeline_fast/3M-5pgex-jan-2023.txt \
+  --sample testQR \
+  --outdir /research/sharedresources/immunoinformatics/common/Suresh/GoT_pipeline_fast/new_analysis_fixed \
+  --queue standard \
+  --dupcut 2 \
+  --threads 8 \
+  --max_chunks 0 \
+  --perl /research/sharedresources/immunoinformatics/common/Suresh/GoT_pipeline_fast/IronThrone-GoT_only_preprocess \
+  --python-bin python \
+  --python-post "$(dirname "$0")/got_post_process.py" \
+  --lev-dist 0.2 \
+  --pcr 0.75 \
+  --bclen 16 \
+  --umilen 10 \
+  --keepouts 2
+```
+
+---
+
+## Outputs
+
+Under `Output/` (inside the run directory):
+
+- `myGoT.summTable.concat.txt` – merged concatenation
+- `myGoT.summTable.concat.umi_collapsed.txt` – per-barcode UMI-collapsed table
+
+The same two files are copied to `--outdir`.
+
+---
+
+## Notes
+
+### `dupcut`
+
+- `dupcut` in the *combiner/collapser* filters UMIs with `(WT+MUT) >= dupcut`.
+- Some legacy wrappers submit the per-chunk Perl step with `-d 1` to **retain all UMIs**, and then apply the final `dupcut` later during combining.
+
+### Performance
+
+The combine step (`04_combine_chunks.py`) is designed to scale to thousands of chunks with streaming Polars parsing and Python multiprocessing for per-barcode UMI collapsing.
+
+---
+
+## License / attribution
+
+The upstream GoT pipeline is available at:
+- https://github.com/dan-landau/IronThrone-GoT
+
+This repository provides cluster wrappers and a fast Python combiner.
