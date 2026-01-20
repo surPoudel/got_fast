@@ -84,7 +84,7 @@ The “slow” R collapsing step uses agrep() to build UMI neighbor sets. Two im
 In the current Python script, collapsing uses full-string Levenshtein distances (via rapidfuzz) and builds transitive components from that graph. Even if it looks close for specific barcodes (e.g., AAACCAAAGAGCTTTG), the global behavior can differ because the neighborhood definition differs from agrep().
 
 
-### Requirements
+## Requirements
 - Python: 3.9+ (3.10/3.11 recommended)
 - Perl: 5.28+ (used by IronThrone-GoT_only_preprocess)
 - R: not required for the fast pipeline (only needed if you still run the original R combiner)
