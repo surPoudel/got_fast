@@ -19,7 +19,7 @@ It is designed for workflows where:
 - `02_submit_chunks.sh` – submits per-chunk LSF jobs
 - `03_wait_for_chunks.sh` – waits for chunk completion markers
 - `04_combine_chunks.py` – fast Polars combiner + R-like UMI collapsing
-- `got_post_process.py` – optional post-processing stub (hook point)
+- `got_post_process.py` – post-processing stub (hook point)
 - `IronThrone_chunk.lsf.tpl` – LSF template for per-chunk jobs
 - `IronThrone_batch.lsf.tpl` – LSF template for the combine job (optional)
 - `IronThrone-GoT_only_preprocess` – the Perl pipeline used for per-chunk preprocessing (passed via `--perl`)
@@ -76,6 +76,13 @@ The same two files are copied to `--outdir`.
 ---
 
 ## Notes
+
+The “slow” R collapsing step uses agrep() to build UMI neighbor sets. Two important properties of that approach:
+* agrep() matching semantics are not the same as standard Levenshtein on full strings. agrep() is an approximate “grep”: it effectively allows unanchored matches (pattern can match within the candidate), which can produce a different neighbor graph than a strict full-string Levenshtein distance. Small differences in “who is a neighbor” change connected components and therefore collapsing decisions.
+* The collapse algorithm is greedy and order-dependent. The R code repeatedly picks the first UMI with max degree, then expands to a transitive closure and collapses. If the graph differs slightly, the greedy choices can diverge and produce different merges downstream.
+
+In the current Python script, collapsing uses full-string Levenshtein distances (via rapidfuzz) and builds transitive components from that graph. Even if it looks close for specific barcodes (e.g., AAACCAAAGAGCTTTG), the global behavior can differ because the neighborhood definition differs from agrep().
+
 
 ### Requirements
 - Python: 3.9+ (3.10/3.11 recommended)
