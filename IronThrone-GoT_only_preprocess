@@ -78,7 +78,7 @@ open LOG, ">>$out_dir/$log_file" || die $!; # open log file for append mode
 # main function
 ##################################################
 
-#pre_process()  ;
+pre_process()  ;
 #post_process() ;
 
 ##################################################
